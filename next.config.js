@@ -23,7 +23,7 @@ const config = {
     // Note: subdomains must be included in the domain value to be matched e.g. "fr.example.com".
     domains: [
       {
-        domain: 'localhost',
+        domain: 'stargaze-nft-viewer.netlify.app',
         defaultLocale: 'en-US',
       },
     ],

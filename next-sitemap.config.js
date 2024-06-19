@@ -1,5 +1,5 @@
 const config = {
-  siteUrl: "https://netlfify-eventual-url.netlify.app",
+  siteUrl: "https://stargaze-nft-viewer.netlify.app",
   exclude: ["/icon.svg", "/apple-icon.png", "/manifest.webmanifest", "/tags/*"],
   generateRobotsTxt: true,
   generateIndexSitemap: false,
