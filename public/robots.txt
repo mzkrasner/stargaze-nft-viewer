@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://netlfify-eventual-url.netlify.app
+
+# Sitemaps
+Sitemap: https://netlfify-eventual-url.netlify.app/sitemap.xml

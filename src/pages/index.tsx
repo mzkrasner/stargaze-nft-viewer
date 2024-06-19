@@ -110,7 +110,7 @@ export default function Home() {
 
   useEffect(() => {
     if (account) {
-      getNfts(account.bech32Address);
+      void getNfts(account.bech32Address);
     }
     return () => {
       setTokens([]);
@@ -252,7 +252,7 @@ export default function Home() {
                       <Item
                         id={activeId.toString()}
                         isDragging
-                        token={tokens[Number(activeId)] as NftProps} // Cast tokens[Number(activeId)] to NftProps
+                        token={tokens[Number(activeId)]!} 
                         index={Number(activeId)}
                       />
                     )}
