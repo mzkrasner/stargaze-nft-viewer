@@ -32,6 +32,7 @@ export default function Home() {
     undefined,
   );
   const [displayedTokens, setDisplayedTokens] = useState<number>(3);
+  const [none, setNone] = useState<boolean>(false);
   const { color } = useStore();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
@@ -58,9 +59,9 @@ export default function Home() {
 
   const getNfts = async (addr: string): Promise<NftProps[] | undefined> => {
     try {
-      const response = await getOwnedNfts(addr, displayedTokens);
+      const response = await getOwnedNfts(addr, 3);
       // sort by lastSalePrice.amountUsd since this option is not available in the query
-      const tokens = response.data.tokens.tokens
+      const newTokens = response.data.tokens.tokens
         .map((item) => Object.assign({}, item, { selected: false }))
         .sort((a, b) => {
           if (a.lastSalePrice?.amountUsd && b.lastSalePrice?.amountUsd) {
@@ -68,7 +69,18 @@ export default function Home() {
           }
           return 0;
         });
-      setTokens(tokens);
+      if (newTokens.length === 0) {
+        setNone(true);
+        setTokens([]);
+        return;
+      }
+      setNone(false);
+      if (newTokens.length < 3) {
+        setDisplayedTokens(newTokens.length);
+      } else {
+        setDisplayedTokens(3);
+      }
+      setTokens(newTokens);
       return tokens;
     } catch (error) {
       console.error(error);
@@ -102,6 +114,7 @@ export default function Home() {
     }
     return () => {
       setTokens([]);
+      setDisplayedTokens(3);
     };
   }, [account]);
 
@@ -186,7 +199,11 @@ export default function Home() {
                 </Button>
               )}
             </div>
-
+            {account && none && (
+              <p className="mx-auto my-4 w-full max-w-md bg-transparent text-center text-sm font-medium leading-relaxed tracking-wide text-muted-foreground">
+                No NFTs found in your wallet.
+              </p>
+            )}
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -218,7 +235,7 @@ export default function Home() {
                             <Button
                               onClick={() => removeItem(token.tokenId)}
                               variant="secondary"
-                              className="mt-4  text-destructive-foreground shadow-sm hover:bg-destructive/90"
+                              className="mt-4   shadow-sm hover:bg-destructive/90"
                             >
                               Remove
                             </Button>
