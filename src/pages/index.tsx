@@ -36,6 +36,7 @@ export default function Home() {
   const { color } = useStore();
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
+  // Drag and drop handlers
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id);
   }, []);
@@ -57,6 +58,7 @@ export default function Home() {
     setActiveId(undefined);
   }, []);
 
+  // Call for NFTs will occur each time there is a change to the account connected
   const getNfts = async (addr: string): Promise<NftProps[] | undefined> => {
     try {
       const response = await getOwnedNfts(addr, 3);
@@ -88,6 +90,7 @@ export default function Home() {
     }
   };
 
+  // Allowing the user to show more or less NFTs
   const alterView = (caseType: number) => {
     // setDisplayedRows(displayedRows + 1);
     switch (caseType) {
@@ -102,6 +105,7 @@ export default function Home() {
     }
   };
 
+  // Necessary for allowing individual removal of NFTs
   const removeItem = (tokenId: string) => {
     // remove item based on tokenId from tokens
     setTokens((tokens) => tokens.filter((token) => token.tokenId !== tokenId));
