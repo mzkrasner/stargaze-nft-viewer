@@ -20,7 +20,7 @@ const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
     <GrazProvider grazOptions={options}>
       <main className={font.className}>
         <Head>
-          <link rel="icon" href="/logo.png" />
+          <link rel="icon" href="atom.svg" sizes="any" />
           <meta property="og:image" content="/logo.png" />
           <meta property="og:type" content="website" />
           <meta name="twitter:image" content="/logo.png" />
