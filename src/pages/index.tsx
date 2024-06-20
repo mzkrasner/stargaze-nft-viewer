@@ -21,13 +21,14 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useAccount } from "graz";
-import { getOwnedNfts } from "@/services/index";
+import { getOwnedNfts, getAllNfts } from "@/services/index";
 import useStore from "@/zustand/store";
 import Head from "next/head";
 
 export default function Home() {
   const { data: account } = useAccount();
   const [tokens, setTokens] = useState<NftProps[]>([]);
+  const [allTokens, setAllTokens] = useState<NftProps[]>([]);
   const [activeId, setActiveId] = useState<UniqueIdentifier | undefined>(
     undefined,
   );
@@ -71,9 +72,22 @@ export default function Home() {
           }
           return 0;
         });
+
+      const allResponse = await getAllNfts(addr);
+      // sort by lastSalePrice.amountUsd since this option is not available in the query
+      const allResponseTokens = allResponse.data.tokens.tokens
+        .map((item) => Object.assign({}, item, { selected: false }))
+        .sort((a, b) => {
+          if (a.lastSalePrice?.amountUsd && b.lastSalePrice?.amountUsd) {
+            return b.lastSalePrice.amountUsd - a.lastSalePrice.amountUsd;
+          }
+          return 0;
+        });
+
       if (newTokens.length === 0) {
         setNone(true);
         setTokens([]);
+        setAllTokens([]);
         return;
       }
       setNone(false);
@@ -83,6 +97,7 @@ export default function Home() {
         setDisplayedTokens(3);
       }
       setTokens(newTokens);
+      setAllTokens(allResponseTokens);
       return tokens;
     } catch (error) {
       console.error(error);
@@ -118,6 +133,7 @@ export default function Home() {
     }
     return () => {
       setTokens([]);
+      setAllTokens([]);
       setDisplayedTokens(3);
     };
   }, [account]);
@@ -185,10 +201,10 @@ export default function Home() {
               {" "}
               {tokens.length > 0 && (
                 <p className="mx-auto my-4 w-full max-w-md bg-transparent text-center text-sm font-medium leading-relaxed tracking-wide text-muted-foreground">
-                  Showing: {displayedTokens} out of {tokens.length} NFTs
+                  Showing: {displayedTokens} out of {allTokens.length} NFTs
                 </p>
               )}{" "}
-              {tokens.length > displayedTokens && (
+              {allTokens.length > displayedTokens && (
                 <Button
                   onClick={() => alterView(1)}
                   variant="default"
@@ -256,7 +272,7 @@ export default function Home() {
                       <Item
                         id={activeId.toString()}
                         isDragging
-                        token={tokens[Number(activeId)]!} 
+                        token={tokens[Number(activeId)]!}
                         index={Number(activeId)}
                       />
                     )}

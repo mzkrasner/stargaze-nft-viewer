@@ -78,3 +78,70 @@ export const getOwnedNfts = (
   		`,
   });
 };
+
+export const getAllNfts = (
+  ownerAddrOrName: string
+): Promise<ApolloQueryResult<{ tokens: { tokens: NftProps[] } }>> => {
+  return client.query<{
+    tokens: {
+      tokens: NftProps[];
+    };
+  }>({
+    query: gql`
+			query {
+			  tokens(ownerAddrOrName: "${ownerAddrOrName}") {
+                tokens {
+                    name
+                    description
+                    edition
+                    tokenId
+                    tokenUri
+                    media {
+                        height
+                        type
+                        urls
+                        width
+                        visualAssets {
+                            lg {
+                                height
+                                staticUrl
+                                type
+                                url
+                                width
+                                staticUrl
+                            }
+                            md {
+                                height
+                                staticUrl
+                                type
+                                url
+                                width
+                            }
+                            sm {
+                                height
+                                staticUrl
+                                type
+                                url
+                                width
+                            }
+                        }
+                        
+                    }
+                    listPrice {
+                        amount
+                    }
+                    lastSalePrice {
+                        amount
+                        amountUsd
+                    }
+                    collection {
+                        contractAddress
+                        contractUri
+                        floorPrice
+                    }
+                }
+			  }
+			}
+  		`,
+  });
+};
