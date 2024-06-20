@@ -96,7 +96,6 @@ export default function Home() {
 
   // Allowing the user to show more or less NFTs
   const alterView = (caseType: number) => {
-    // setDisplayedRows(displayedRows + 1);
     switch (caseType) {
       case 1:
         setDisplayedTokens(displayedTokens + 1);
