@@ -28,6 +28,7 @@ import Head from "next/head";
 export default function Home() {
   const { data: account } = useAccount();
   const [allTokens, setAllTokens] = useState<NftProps[]>([]);
+  const [deletedTokens, setDeletedTokens] = useState<NftProps[]>([]);
   const [total, setTotal] = useState<number | undefined>(undefined);
   const [activeId, setActiveId] = useState<UniqueIdentifier | undefined>(
     undefined,
@@ -111,8 +112,28 @@ export default function Home() {
   // Necessary for allowing individual removal of NFTs
   const removeItem = (tokenId: string) => {
     // remove item based on tokenId from tokens
-    setAllTokens((allTokens) => allTokens.filter((token) => token.tokenId !== tokenId));
-    setDisplayedTokens(displayedTokens - 1);
+    const tokenToRemove = allTokens.find((token) => token.tokenId === tokenId);
+    if (tokenToRemove) {
+      setDeletedTokens((deletedTokens) => [...deletedTokens, tokenToRemove]);
+      setAllTokens((allTokens) =>
+        allTokens.filter((token) => token.tokenId !== tokenId),
+      );
+      setDisplayedTokens(displayedTokens - 1);
+    }
+  };
+
+  // Necessary for allowing individual adding back of NFTs
+  const reverseRemoval = (tokenId: string) => {
+    const tokenToReverse = deletedTokens.find(
+      (token) => token.tokenId === tokenId,
+    );
+    if (tokenToReverse) {
+      setDeletedTokens((deletedTokens) =>
+        deletedTokens.filter((token) => token.tokenId !== tokenId),
+      );
+      setAllTokens((allTokens) => [...allTokens, tokenToReverse]);
+      setDisplayedTokens(displayedTokens + 1);
+    }
   };
 
   useEffect(() => {
@@ -269,6 +290,40 @@ export default function Home() {
             </DndContext>
           </div>
         </div>
+        <div className="absolute top-0 -z-10 h-full max-h-full w-full blur-2xl">
+          <div className="absolute bottom-0 left-0 h-56 w-1/2 animate-blob rounded-full bg-violet-600 opacity-70 mix-blend-multiply blur-3xl filter"></div>
+          <div className="absolute bottom-0 right-0 h-56 w-1/2 animate-blob rounded-full bg-sky-600 opacity-70 mix-blend-multiply blur-3xl filter delay-1000"></div>
+        </div>
+      </section>
+      <section className="relative border-border from-background via-background via-90% to-transparent">
+        {deletedTokens.length > 0 && (
+          <div className="container mx-auto text-center">
+            <div className="my-10">
+              <h2 className="my-4 text-2xl font-bold">Deleted NFTs</h2>
+              <div className="my-16">
+                {" "}
+                <p className="mx-auto my-4 w-full max-w-md bg-transparent text-center text-sm font-medium leading-relaxed tracking-wide text-muted-foreground">
+                  Showing: {deletedTokens.length} NFTs
+                </p>
+              </div>
+              <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {deletedTokens.length > 0 &&
+                  deletedTokens.map((token, index) => (
+                    <button
+                      key={`item-${index.toString()}`}
+                      className="max-w-xs"
+                      onClick={() => reverseRemoval(token.tokenId)}
+                    >
+                      <p className="text-center text-sm font-medium leading-relaxed tracking-wide text-muted-foreground">
+                        Bring Back
+                      </p>
+                      <Item token={token} index={index} />
+                    </button>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="absolute top-0 -z-10 h-full max-h-full w-full blur-2xl">
           <div className="absolute bottom-0 left-0 h-56 w-1/2 animate-blob rounded-full bg-violet-600 opacity-70 mix-blend-multiply blur-3xl filter"></div>
           <div className="absolute bottom-0 right-0 h-56 w-1/2 animate-blob rounded-full bg-sky-600 opacity-70 mix-blend-multiply blur-3xl filter delay-1000"></div>
