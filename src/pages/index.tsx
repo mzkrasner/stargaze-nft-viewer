@@ -190,7 +190,7 @@ export default function Home() {
               {" "}
               {allTokens.length > 0 && (
                 <p className="mx-auto my-4 w-full max-w-md bg-transparent text-center text-sm font-medium leading-relaxed tracking-wide text-muted-foreground">
-                  Showing: {displayedTokens} out of {allTokens.length} NFTs
+                  Showing: {displayedTokens} out of {total} NFTs
                 </p>
               )}{" "}
               {allTokens.length > displayedTokens && (
