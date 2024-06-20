@@ -21,14 +21,14 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useAccount } from "graz";
-import { getOwnedNfts, getAllNfts } from "@/services/index";
+import { getAllNfts } from "@/services/index";
 import useStore from "@/zustand/store";
 import Head from "next/head";
 
 export default function Home() {
   const { data: account } = useAccount();
-  const [tokens, setTokens] = useState<NftProps[]>([]);
   const [allTokens, setAllTokens] = useState<NftProps[]>([]);
+  const [total, setTotal] = useState<number | undefined>(undefined);
   const [activeId, setActiveId] = useState<UniqueIdentifier | undefined>(
     undefined,
   );
@@ -45,7 +45,7 @@ export default function Home() {
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
-      setTokens((tokens) => {
+      setAllTokens((tokens) => {
         const oldIndex = Number(active.id);
         const newIndex = Number(over?.id);
         return arrayMove(tokens, oldIndex, newIndex);
@@ -62,17 +62,6 @@ export default function Home() {
   // Call for NFTs will occur each time there is a change to the account connected
   const getNfts = async (addr: string): Promise<NftProps[] | undefined> => {
     try {
-      const response = await getOwnedNfts(addr, 3);
-      // sort by lastSalePrice.amountUsd since this option is not available in the query
-      const newTokens = response.data.tokens.tokens
-        .map((item) => Object.assign({}, item, { selected: false }))
-        .sort((a, b) => {
-          if (a.lastSalePrice?.amountUsd && b.lastSalePrice?.amountUsd) {
-            return b.lastSalePrice.amountUsd - a.lastSalePrice.amountUsd;
-          }
-          return 0;
-        });
-
       const allResponse = await getAllNfts(addr);
       // sort by lastSalePrice.amountUsd since this option is not available in the query
       const allResponseTokens = allResponse.data.tokens.tokens
@@ -84,21 +73,21 @@ export default function Home() {
           return 0;
         });
 
-      if (newTokens.length === 0) {
+      if (allResponseTokens.length === 0) {
         setNone(true);
-        setTokens([]);
+        setTotal(undefined);
         setAllTokens([]);
         return;
       }
       setNone(false);
-      if (newTokens.length < 3) {
-        setDisplayedTokens(newTokens.length);
+      if (allResponseTokens.length < 3) {
+        setDisplayedTokens(allResponseTokens.length);
       } else {
         setDisplayedTokens(3);
       }
-      setTokens(newTokens);
       setAllTokens(allResponseTokens);
-      return tokens;
+      setTotal(allResponseTokens.length);
+      return allTokens;
     } catch (error) {
       console.error(error);
       return undefined;
@@ -123,7 +112,7 @@ export default function Home() {
   // Necessary for allowing individual removal of NFTs
   const removeItem = (tokenId: string) => {
     // remove item based on tokenId from tokens
-    setTokens((tokens) => tokens.filter((token) => token.tokenId !== tokenId));
+    setAllTokens((allTokens) => allTokens.filter((token) => token.tokenId !== tokenId));
     setDisplayedTokens(displayedTokens - 1);
   };
 
@@ -132,8 +121,8 @@ export default function Home() {
       void getNfts(account.bech32Address);
     }
     return () => {
-      setTokens([]);
       setAllTokens([]);
+      setTotal(undefined);
       setDisplayedTokens(3);
     };
   }, [account]);
@@ -199,7 +188,7 @@ export default function Home() {
             )}
             <div className="my-16">
               {" "}
-              {tokens.length > 0 && (
+              {allTokens.length > 0 && (
                 <p className="mx-auto my-4 w-full max-w-md bg-transparent text-center text-sm font-medium leading-relaxed tracking-wide text-muted-foreground">
                   Showing: {displayedTokens} out of {allTokens.length} NFTs
                 </p>
@@ -213,7 +202,7 @@ export default function Home() {
                   Show More
                 </Button>
               )}
-              {tokens.length > 0 && displayedTokens !== 0 && (
+              {allTokens.length > 0 && displayedTokens !== 0 && (
                 <Button onClick={() => alterView(2)} variant="secondary">
                   Show Less
                 </Button>
@@ -237,13 +226,13 @@ export default function Home() {
                 key="grid"
               >
                 {account &&
-                  tokens.length > 0 &&
-                  tokens.map((token, index) => (
+                  allTokens.length > 0 &&
+                  allTokens.map((token, index) => (
                     <div key={`item-${index.toString()}`}>
                       {index < displayedTokens ? (
                         <div className="mt-6">
                           <SortableContext
-                            items={tokens.map((token) => token.tokenId)}
+                            items={allTokens.map((token) => token.tokenId)}
                             strategy={rectSortingStrategy}
                             key={`context-${index.toString()}`}
                           >
@@ -268,11 +257,11 @@ export default function Home() {
                   ))}
                 <DragOverlay adjustScale style={{ transformOrigin: "0 0 " }}>
                   {activeId !== undefined &&
-                    tokens[Number(activeId)] !== undefined && (
+                    allTokens[Number(activeId)] !== undefined && (
                       <Item
                         id={activeId.toString()}
                         isDragging
-                        token={tokens[Number(activeId)]!}
+                        token={allTokens[Number(activeId)]!}
                         index={Number(activeId)}
                       />
                     )}
